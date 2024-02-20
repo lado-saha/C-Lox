@@ -1,21 +1,21 @@
-# CC = gcc
-# CFLAGS = -Wall -g
-#
+CC = gcc
+CFLAGS =  -g
+TARGET = build/clox
+SRCS = $(wildcard *.c)
+OBJS = $(SRCS:%.c=build/%.o)
 
-SOURCES = main.c chunk.c memory.c 
-# OBJECTS = $(SOURCES:.c = .o)
-#
-# all: 
-# 	$(SOURCES)
-#
-# $(SOURCES): $(SOURCES)
-#
-# %.o : %.c
-# 	$(CC) $(CFLAGS) -c $< -o $@
+.PHONY: all clean run
 
+all: $(TARGET)
 
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-$(SOURCES):
-	touch $(SOURCES)
+build/%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
+run:
+	$(TARGET)
 
+clean:
+	rm -f $(OBJS) $(TARGET)
