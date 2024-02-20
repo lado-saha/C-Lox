@@ -1,0 +1,4 @@
+In bytecode, each instruction is only a byte long
+Source Code --(compiler)--> Bytecode --(VM)--> Machine code
+In bytecode format, each instruction has one-byte opcode (ADD, SUB, DIV, PUSH etc)
+
