@@ -10,20 +10,21 @@ int main(int argc, char *argv[]) {
   Chunk chunk;
   initChunk(&chunk);
 
-  int constant = addConstant(&chunk, 1.0003);
-  int const1 = addConstant(&chunk, 3.5);
-  int line = 123;
-  // For a constant, we write byte by byte. The first byte is the opcode
-  // followed by the index of the constant
-  writeChunk(&chunk, OP_CONSTANT, line);
-  writeChunk(&chunk, constant, line);
-
-  writeChunk(&chunk, OP_CONSTANT, line + 2);
-  writeChunk(&chunk, const1, line + 2);
-
-  writeChunk(&chunk, OP_RETURN, line);
+  int constant = addConstant(&chunk, 1.2);
+  writeChunk(&chunk, OP_CONSTANT, 123);
+  writeChunk(&chunk, constant, 123);
+  constant = addConstant(&chunk, 3.4);
+  writeChunk(&chunk, OP_CONSTANT, 123);
+  writeChunk(&chunk, constant, 123);
+  writeChunk(&chunk, OP_ADD, 123);
+  constant = addConstant(&chunk, 5.6);
+  writeChunk(&chunk, OP_CONSTANT, 123);
+  writeChunk(&chunk, constant, 123);
+  writeChunk(&chunk, OP_DIVIDE, 123);
+  writeChunk(&chunk, OP_NEGATE, 123);
+  writeChunk(&chunk, OP_RETURN, 123);
   printf("\n");
-  // disassembleChunk(&chunk, "test_chunk");
+  disassembleChunk(&chunk, "test_chunk");
   interpret(&chunk);
   freeVM();
   freeChunk(&chunk);

@@ -18,7 +18,12 @@ typedef enum {
    *  <opcode> <constant_index> e.g 0010 23, produces the constant stored at
 index 23 from the list of constants in the array
    */
-  OP_CONSTANT
+  OP_CONSTANT,
+  OP_NEGATE, // Unary negation
+  OP_ADD,
+  OP_SUBTRACT,
+  OP_DIVIDE,
+  OP_MULTIPLY
 } OpCode;
 
 #define STACK_MAX 256

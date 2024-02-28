@@ -24,7 +24,13 @@ typedef enum {
 
 void initVM();
 void freeVM();
+/*
+ * This is to produce a constant, done by loading it on the stack
+ */
 void push(Value value);
+/*
+ * This is used to load a constant, by poping from the stack
+ */
 Value pop();
 /*
  * Interpretes a chunk of code and is the main entry point into the into the VM

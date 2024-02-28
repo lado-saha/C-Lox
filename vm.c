@@ -30,7 +30,22 @@ Value pop() {
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->consants.values[READ_BYTE()])
+
+  /*The do { ... } while (false)  is used so that all the code will be pasted in
+   * braces and in the same context, when the macro will be ran *
+   * Notice that the 1st pop goes into `b` and not `a`
+   * Because the right operand is pushed last and so is on top the stack*/
+#define BINARY_OP(op)                                                          \
+  do {                                                                         \
+    double b = pop();                                                          \
+    /* printf("b= %lf", b); */                                                 \
+    double a = pop();                                                          \
+    /*printf(" | a= %lf", a);  */                                              \
+    push(a op b);                                                              \
+  } while (false)
+
   for (;;) {
+
     /* The pointer arithmetic is to find the index of the current instruction,
      * by subtracting the ip the address of first byte in code from the ip
      */
@@ -49,22 +64,44 @@ static InterpretResult run() {
     uint8_t instruction;
 
     switch (instruction = READ_BYTE()) {
+    case OP_CONSTANT: {
+      Value constant = READ_CONSTANT();
+      push(constant);
+      break;
+    }
+    case OP_NEGATE: {
+      // Just notice that we just negate the loaded constant
+      push(-pop());
+      break;
+    }
+    case OP_ADD: {
+      BINARY_OP(+);
+      break;
+    }
+    case OP_SUBTRACT: {
+      BINARY_OP(-);
+      break;
+    }
+    case OP_MULTIPLY: {
+      BINARY_OP(*);
+      break;
+    }
+    case OP_DIVIDE: {
+      BINARY_OP(/);
+      break;
+    }
+
     case OP_RETURN: {
       // Temporary exit point
       printValue(pop());
       printf("\n");
       return INTERPRET_OK;
     }
-    case OP_CONSTANT: {
-      Value constant = READ_CONSTANT();
-      push(constant);
-      break;
     }
-    }
-  }
-
 #undef READ_BYTE
 #undef READ_CONSTANT
+#undef BINARY_OP
+  }
 }
 
 InterpretResult interpret(Chunk *chunk) {
