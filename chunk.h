@@ -21,6 +21,7 @@ index 23 from the list of constants in the array
   OP_CONSTANT
 } OpCode;
 
+#define STACK_MAX 256
 /*
  * Bytecode is a series of instructions or bytes and a group of them is stored
  * in a chunk This is just a Dynamic arraylist structure to store all
