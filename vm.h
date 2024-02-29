@@ -35,6 +35,6 @@ Value pop();
 /*
  * Interpretes a chunk of code and is the main entry point into the into the VM
  */
-InterpretResult interpret(Chunk *chunk);
+InterpretResult interpret(const char *source);
 
 #endif // !DEBUG

@@ -2,3 +2,16 @@ In bytecode, each instruction is only a byte long
 Source Code --(compiler)--> Bytecode --(VM)--> Machine code
 In bytecode format, each instruction has one-byte opcode (ADD, SUB, DIV, PUSH etc)
 
+Stages of interpretation for clox
+Scanner --(Token)-> Compiler --(Chunk)--> VM
+Source Code --(Scanner)--> Tokens --(Compiler)--> Chunks --(VM)--> OK!! 
+
+In clox, we donot have the luxury to scan the whole code eagerly since we donot have access to a dynamic list in C (Very memory wasteful), so since our grammar needs only one or max 2 tokens at a time, we can wait until a token is needed before we scan it.
+
+In C printf("%.<n>s"); where n = 1,2,3 ... is the maximum of characters to show. if n = *, then we need to pass the number as parameter e.g: printf("%.*s", 3);
+ 
+In clox, token store their begining index of their lexeme and then the length of the lexeme as it is. We donot cast the lexeme to a particular type until we reach compilation. This is to avoid memory overuse
+
+Hashmaps are overkill in C to look for keyword identifiers, so we will use a Regular Expression. We will built and Deterministic Finit Automaton (DFA) that recognizes keywords of lox
+
+Notice, we could just build a large DFA that recognizes and spits out tokens from lox using a tool called `Lex` instead of a scanner.

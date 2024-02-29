@@ -1,6 +1,7 @@
 #include "vm.h"
 #include "chunk.h"
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "value.h"
 #include <stdint.h>
@@ -49,7 +50,7 @@ static InterpretResult run() {
     /* The pointer arithmetic is to find the index of the current instruction,
      * by subtracting the ip the address of first byte in code from the ip
      */
-#ifndef DEBUG_TRACE_EXECUTION
+#ifdef DEBUG_TRACE_EXECUTION
     printf("         ");
     for (Value *slot = vm.stack; slot < vm.stackTop; slot++) {
       printf("[ ");
