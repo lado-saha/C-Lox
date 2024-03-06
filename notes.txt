@@ -15,3 +15,5 @@ In clox, token store their begining index of their lexeme and then the length of
 Hashmaps are overkill in C to look for keyword identifiers, so we will use a Regular Expression. We will built and Deterministic Finit Automaton (DFA) that recognizes keywords of lox
 
 Notice, we could just build a large DFA that recognizes and spits out tokens from lox using a tool called `Lex` instead of a scanner.
+
+Compiler = Parser + Code Generation

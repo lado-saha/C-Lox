@@ -24,7 +24,7 @@ void initScanner(const char *source) {
   scanner.line = 1;
 }
 
-/**
+/*
  * A simple constructor for tokens of a particular type
  */
 static Token makeToken(TokenType type) {
@@ -63,6 +63,8 @@ static bool isAtEnd() { return *scanner.current == '\0'; }
  */
 char advance() {
   scanner.current++;
+  // the -1 will return the previous character since we increemented
+  // Similar to *(scanner.current - 1)
   return scanner.current[-1];
 }
 
@@ -247,6 +249,9 @@ Token identifier() {
 
 /* Heart of the scanner */
 Token scanToken() {
+  /*
+   * Always trim the text before scanning out a token
+   */
   skipWhitespace();
   scanner.start = scanner.current;
 

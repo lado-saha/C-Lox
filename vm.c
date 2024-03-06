@@ -105,9 +105,27 @@ static InterpretResult run() {
   }
 }
 
-InterpretResult interpret(Chunk *chunk) {
-  vm.chunk = chunk;
-  // We begin with the first byte of the chunk
+/*
+ * This is the entry point of the whole compilation process
+ * Takes source code compile it into bytecode chunk and
+ * then execute it in the vm*/
+InterpretResult interpret(const char *source) {
+  Chunk chunk;
+  initChunk(&chunk);
+
+  /* Try to compile the source code into bytecode chunk. If any error, stop and
+   * return compilation error */
+  if (!compile(source, &chunk)) {
+    freeChunk(&chunk);
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  vm.chunk = &chunk;
   vm.ip = vm.chunk->code;
-  return run();
+
+  InterpretResult result = run();
+
+  freeChunk(&chunk);
+  return result;
 }
+std::out_of_range
