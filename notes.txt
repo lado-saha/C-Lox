@@ -17,3 +17,5 @@ Hashmaps are overkill in C to look for keyword identifiers, so we will use a Reg
 Notice, we could just build a large DFA that recognizes and spits out tokens from lox using a tool called `Lex` instead of a scanner.
 
 Compiler = Parser + Code Generation
+
+Precedence is very important in parsing expressions remember BODMAS. When you finish parsing an operator, the ideal thing is to continue parsing only expressions which are greater than it.
