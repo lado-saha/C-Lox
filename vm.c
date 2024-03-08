@@ -51,7 +51,7 @@ static InterpretResult run() {
      * by subtracting the ip the address of first byte in code from the ip
      */
 #ifdef DEBUG_TRACE_EXECUTION
-    printf("         ");
+    printf("        ");
     for (Value *slot = vm.stack; slot < vm.stackTop; slot++) {
       printf("[ ");
       printValue(*slot);
@@ -128,4 +128,3 @@ InterpretResult interpret(const char *source) {
   freeChunk(&chunk);
   return result;
 }
-std::out_of_range

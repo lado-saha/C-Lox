@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef DEBUG_PRINT_CODE
+#include "debug.h"
+#endif /* ifndef DEBUG_PRINT_CODE */
+
 /**
  * Used to hold the current and previous token in memory for compilation
  * @hadError This is returned by the compiler for the VM to know if any error
@@ -39,7 +43,7 @@ typedef enum {
   PREC_FACTOR,     // * /
   PREC_UNARY,      // ! -
   PREC_CALL,       // . ()
-  PREC_PRIMARY
+  PREC_PRIMARY     // numbers or literals
 } Precedence;
 
 /*
@@ -170,27 +174,40 @@ static void emitConstant(Value value) {
   emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
-static void parsePrecedence(Precedence precedence) {
+static void parsePrecedence(Precedence minumum) {
   advance();
-  // We get the prefix rule which is a function pointer or NULL
+
   ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+  // Syntax error
   if (prefixRule == NULL) {
     error("Expect expression.");
     return;
   }
+  // We call the function to parse it. It can be unary() etc
   prefixRule();
 
   /*
-   * We continuously parse till we reach a lower precendence
-   */
-  while (precedence <= getRule(parser.current.type)->precedence) {
+   * We continuously parse till we reach a lower precendence or a non infix
+   *operator
+   *
+   *Next we parse infix rules like binary(), factor() etc as long as their
+   * precendence is greater or equals to the minimum */
+  while (minumum <= getRule(parser.current.type)->precedence) {
     advance();
     ParseFn infixRule = getRule(parser.previous.type)->infix;
     infixRule();
   }
 }
 
-static void endCompiler() { emitReturn(); }
+static void endCompiler() {
+  emitReturn();
+
+#ifdef DEBUG_PRINT_CODE
+  if (!parser.hadError) {
+    disassembleChunk(currentChunck(), "code");
+  }
+#endif /* ifdef DEBUG_PRINT_CODE*/
+}
 
 /*
  * We want to parse all things that have greater precedence than assignments
@@ -262,7 +279,6 @@ static void unary() {
    * a.b and not to the rest of the operation as binary + has lesser precendence
    * than unary*/
   parsePrecedence(PREC_UNARY);
-  expression();
 
   switch (operatorType) {
   case TOKEN_MINUS:
