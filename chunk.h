@@ -15,14 +15,24 @@ typedef enum {
    * Aimed at producing a constants
    * It has an operand. An the operand is the index of the constant to produce
    * It is a 2byte instruction of the format
-   *  <opcode> <constant_index> e.g 0010 23, produces the constant stored at
+   *  <opcode> <constant_index> e.g 0009 23, produces the constant stored at
 index 23 from the list of constants in the array
    */
   OP_CONSTANT,
   OP_NEGATE, // Unary negation
   OP_ADD,
+
+  OP_NIL,
+  OP_TRUE,
+  OP_FALSE,
+
+  OP_EQUAL,
+  OP_GREATER,
+  OP_LESS,
+
   OP_SUBTRACT,
   OP_DIVIDE,
+  OP_NOT,
   OP_MULTIPLY
 } OpCode;
 

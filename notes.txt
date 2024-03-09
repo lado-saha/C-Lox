@@ -19,3 +19,7 @@ Notice, we could just build a large DFA that recognizes and spits out tokens fro
 Compiler = Parser + Code Generation
 
 Precedence is very important in parsing expressions remember BODMAS. When you finish parsing an operator, the ideal thing is to continue parsing only expressions which are greater than it.
+
+The compiler always advances past ecah instruction before executing it
+
+When we add and Operation Opcode in (chunk.h), we add the when to call it in the compiler.c's rules array, then we modify the corresponding infix or prefix function, then we  
