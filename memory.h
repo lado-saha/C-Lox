@@ -3,6 +3,13 @@
 
 #include "common.h"
 
+/* To allocate a particular type of object */
+#define ALLOCATE(type, count)                                                  \
+  (type *)reallocate(NULL, 0, sizeof(type) * (count))
+
+/* simple free the memory blob pointer */
+#define FREE(type, pointer) reallocate(pointer, sizeof(type), 0)
+
 /*
  * The capacity is always a multiple of 8.
  * If the capacity is less than 8 (i.e 0), we set it to 8 else we
@@ -26,5 +33,9 @@
  *
  */
 void *reallocate(void *pointer, size_t oldSize, size_t newSize);
+/*
+ * This ensures that all allocated objects are not dereferenced without freeing
+ */
+void freeObjects();
 
 #endif // !clox_memory_h

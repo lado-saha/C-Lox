@@ -7,12 +7,16 @@
  * @ip is the Instruction Pointer or a Program counter. It will always point to
  * the next Instruction or byte to be executed in a given chunk. We begin from
  * the first byte of the chunk
+ *
+ * @objects The pointer to the head of the linked list of all ever allocated obj
  */
 typedef struct {
   Chunk *chunk;
   uint8_t *ip;
   Value stack[STACK_MAX];
   Value *stackTop;
+
+  Obj *objects;
 
 } VM;
 
@@ -21,6 +25,8 @@ typedef enum {
   INTERPRET_COMPILE_ERROR,
   INTERPRET_RUNTIME_ERROR
 } InterpretResult;
+
+extern VM vm;
 
 void initVM();
 void freeVM();

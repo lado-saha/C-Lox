@@ -1,5 +1,6 @@
 #include "compiler.h"
 #include "chunk.h"
+#include "object.h"
 #include "scanner.h"
 #include "value.h"
 #include <stdbool.h>
@@ -305,6 +306,21 @@ static void number() {
   emitConstant(NUMBER_VAL(value));
 }
 
+/*
+ * We save a copy of the string from the source code because we want to avoid to
+ * point to it.
+ *
+ * Assumes the begining ", has been comsumed, we copy the
+ * characters from the parser and create a string out of the characters and then
+ * emit it to the chunk.
+ */
+static void string() {
+  // Notice the previous.start+1 is the first character of the string since
+  // previous.start is `"`
+  emitConstant(OBJ_VAL(
+      copyString(parser.previous.start + 1, parser.previous.length - 2)));
+}
+
 /**
  * Assumes the the begining unary operator has already been consumed
  * in this case `!` or `-`
@@ -355,7 +371,7 @@ ParseRule rules[] = {
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
 
     [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
-    [TOKEN_STRING] = {NULL, NULL, PREC_NONE},
+    [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},

@@ -23,3 +23,5 @@ Precedence is very important in parsing expressions remember BODMAS. When you fi
 The compiler always advances past ecah instruction before executing it
 
 When we add and Operation Opcode in (chunk.h), we add the when to call it in the compiler.c's rules array, then we modify the corresponding infix or prefix function, then we  
+
+For storing values 
