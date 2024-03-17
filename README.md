@@ -2,11 +2,12 @@
 
 This project is my journey through the fantastic book
 
-**!["Crafting Interpreters" by Robert Nystrom](https://craftinginterpreters.com/)**.The book dives deep into how programming languages work by guiding readers to build their own interpreters and then their own compiler. It does this through the creation of a dynamically typed language called Lox. This is the C implemtation, from the second part of the book
+**["Crafting Interpreters" by Robert Nystrom](https://craftinginterpreters.com/)**.The book dives deep into how programming languages work by guiding readers to build their own interpreters and then their own compiler. It does this through the creation of a dynamically typed language called Lox. This is the C implemtation, from the second part of the book
 
 The book is truly written in FUNNY but CONCISE language. I never knew cracking jokes could go hand in hand with the dark art of creating compilers
 
 **Project Description:**
+
 We are currently building an interpreted language called lox, which compiles source code into bytecode and execute it using a VM.. So far, I've implemented features like:
 
 * A Parser (Using Pratt's Parsing technique) which produces tokens
