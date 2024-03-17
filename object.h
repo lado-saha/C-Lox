@@ -40,11 +40,15 @@ struct Obj {
  * @length is used to know the size of the string so that we donot need a null
  * terminator
  * @chars points to the actual array of characters
+ * @hash Each String hash their hashcode cached in their definition, to be used
+ * later if it ever becomes a key. This is possible because Strings are
+ * immutable .
  */
 struct ObjString {
   Obj obj;
   int length;
   char *chars;
+  uint32_t hash;
 };
 
 /*

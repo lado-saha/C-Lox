@@ -22,6 +22,19 @@ Precedence is very important in parsing expressions remember BODMAS. When you fi
 
 The compiler always advances past ecah instruction before executing it
 
-When we add and Operation Opcode in (chunk.h), we add the when to call it in the compiler.c's rules array, then we modify the corresponding infix or prefix function, then we  
+When we add and Operation Opcode in (chunk.h), we add the when to call it in the compiler.c's rules array, then we modify the corresponding infix or prefix function, then we 
 
-For storing values 
+Functions, Strings and classe types are stored in the heap and not the stack because they have a variable size 
+
+============================HASH TABLES=====================================
+- Our hashmap or hashtable or dictionnary or ... is simply an array of buckets(empty cells).
+- For every value, we produce a constant hash integer, which can be used as an index of the bucket to find the value. Usually, we take `hash mod(Number of buckets)` and so have risk of collisions since we use modulus. 
+- Each array cell can be seen as a bucket
+- The load factor is the value of the ratio `Number of entries`: `Number of buckets`
+- Collision resolving techniques include 
+1) Separate Chaining, in which the bucket points to a linked list containing in an unordered manner all values which collided. So index 3 points to a list containing all value whose hash was three and we need to parcour the list to get the value, somehow
+2) Open Addressing or Closed Hashing, Here if a collisions is found, we find the next empty bucket in our array and fill it and if we reach the end of the array, we coil back at to the first element and continue our search and fail when we reach our starting point. This method is CPUcache friendly. The process of parcouring to find an empty cell is called Linear probing. But how do we get back the value ?????
+
+ A tombstone entry is one which is added to a bucket after a deletion is performed on the bucket. This is to delete without destroying probing
+
+ String interning is an interesting concept in that, we make similar strings point to the same memory location and thus making comparison trivial. We use tables for that.

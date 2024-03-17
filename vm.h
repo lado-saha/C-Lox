@@ -2,6 +2,7 @@
 #define clox_vm_h
 
 #include "chunk.h"
+#include "table.h"
 
 /*
  * @ip is the Instruction Pointer or a Program counter. It will always point to
@@ -9,13 +10,15 @@
  * the first byte of the chunk
  *
  * @objects The pointer to the head of the linked list of all ever allocated obj
+ * @strings For string interning to fasten string comparisons. We intern all
+ * strings in Lox
  */
 typedef struct {
   Chunk *chunk;
   uint8_t *ip;
   Value stack[STACK_MAX];
   Value *stackTop;
-
+  Table strings;
   Obj *objects;
 
 } VM;
