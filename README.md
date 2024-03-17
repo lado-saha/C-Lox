@@ -2,7 +2,7 @@
 
 This project is my journey through the fantastic book
 
-**["Crafting Interpreters" by Robert Nystrom](https://craftinginterpreters.com/)**.The book dives deep into how programming languages work by guiding readers to build their own interpreters and then their own compiler. It does this through the creation of a dynamically typed language called Lox. This is the C implemtation, from the second part of the book
+**["Crafting Interpreters" by Robert Nystrom](https://craftinginterpreters.com/)**.The book dives deep into how programming languages work by guiding readers to build their own interpreters and then their own compiler. It does this through the creation of a dynamically typed language called Lox, an Object oriented + functional dynamically typed PL. This is the C implemtation, from the second part of the book
 
 The book is truly written in FUNNY but CONCISE language. I never knew cracking jokes could go hand in hand with the dark art of creating compilers
 
@@ -17,9 +17,7 @@ We are currently building an interpreted language called lox, which compiles sou
 * Number types, String types, hash tables implemented
 * And many more ...
 
-**Future Work (Optional):**
-
-As I progress through the book, I plan to implement features like:
+**Future Work**
 
 * The main aim of learning this is to be able to learn reverse engineering of malware executables in my aim to becoming a cybersecurity expert
 
