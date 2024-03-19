@@ -21,6 +21,17 @@ We are currently building an interpreted language called lox, which compiles sou
 
 * The main aim of learning this is to be able to learn reverse engineering of malware executables in my aim to becoming a cybersecurity expert
 
+**How to test**
+
+* Clone the Project
+* Navigate into the project, then... 
+```bash
+# To run the REPL
+make clean all run;
+
+# To run a file , comming next
+
+```
 
 **Conclusion:**
 
