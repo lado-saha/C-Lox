@@ -12,12 +12,14 @@
  * @objects The pointer to the head of the linked list of all ever allocated obj
  * @strings For string interning to fasten string comparisons. We intern all
  * strings in Lox
+ * @globals stores all the global variables by name
  */
 typedef struct {
   Chunk *chunk;
   uint8_t *ip;
   Value stack[STACK_MAX];
   Value *stackTop;
+  Table globals;
   Table strings;
   Obj *objects;
 

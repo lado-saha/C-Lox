@@ -145,8 +145,6 @@ ObjString *tableFindString(Table *table, const char *chars, int length,
     }
     index = (index + 1) % table->capacity;
   }
-
-  printf("Called \n");
 }
 
 bool tableGet(Table *table, ObjString *key, Value *value) {

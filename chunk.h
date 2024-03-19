@@ -20,7 +20,11 @@ index 23 from the list of constants in the array
    */
   OP_CONSTANT,
   OP_NEGATE, // Unary negation
+  OP_PRINT,
   OP_ADD,
+
+  // To emit a result or value from the stack
+  OP_POP,
 
   OP_NIL,
   OP_TRUE,
@@ -33,7 +37,11 @@ index 23 from the list of constants in the array
   OP_SUBTRACT,
   OP_DIVIDE,
   OP_NOT,
-  OP_MULTIPLY
+  OP_MULTIPLY,
+
+  OP_DEFINE_GLOBAL,
+  OP_GET_GLOBAL,
+
 } OpCode;
 
 #define STACK_MAX 256

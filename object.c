@@ -83,8 +83,6 @@ ObjString *takeString(char *chars, int length) {
   uint32_t hash = hashString(chars, length);
   ObjString *interned = tableFindString(&vm.strings, chars, length, hash);
 
-  printf("Called me \n");
-
   // If this is a new string, we intern
   if (interned != NULL) {
     FREE_ARRAY(char, chars, length + 1);

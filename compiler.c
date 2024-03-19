@@ -72,13 +72,34 @@ Parser parser;
 
 /*Brief declaration of functions
  */
+
+static void consume(TokenType type, const char *message);
 static void expression();
+static void statement();
+static void declaration();
 static ParseRule *getRule(TokenType type);
 /**
  * This is nice way to only parse expressions whose precdence is higher or
  * equals to the provided @minimum precedence
  */
 static void parsePrecedence(Precedence minimum);
+static uint8_t makeConstant(Value value);
+
+/* given a an identifier token, we add its lexeme to the chunk's constant table
+ * as a string and return the index */
+static uint8_t indentifierConstant(Token *name) {
+  return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
+}
+
+/*
+ * Tries to parse and consume an identifier string as the variable name, then
+stores it in the chunk's constants and return the index
+ */
+static uint8_t parseVariable(const char *errorMessage) {
+  consume(TOKEN_IDENTIFIER, errorMessage);
+  return indentifierConstant(&parser.previous);
+}
+
 /*End of declaration*/
 
 // A chunk can represent a scope or context of executation
@@ -136,6 +157,17 @@ static void consume(TokenType type, const char *message) {
   }
 
   errorAtCurrent(message);
+}
+
+/* Is the current token equals to one provided */
+static bool check(TokenType type) { return parser.current.type == type; }
+
+/* Matches and consumes */
+static bool match(TokenType type) {
+  if (!check(type))
+    return false;
+  advance();
+  return true;
 }
 
 /*
@@ -215,11 +247,89 @@ static void endCompiler() {
  */
 void expression() { parsePrecedence(PREC_ASSIGNMENT); }
 
+static void defineVariable(uint8_t global) {
+  emitBytes(OP_DEFINE_GLOBAL, global);
+}
+
+static void varDeclaration() {
+  uint8_t global = parseVariable("Expect variable name.");
+
+  if (match(TOKEN_EQUAL)) {
+    expression();
+  } else {
+    // By default all non initialized vars are initialized to null
+    emitByte(OP_NIL);
+  }
+  consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+  defineVariable(global);
+}
+
+/** Generalizes the concepts of expressions by requiring them to end with a
+ * semicolon */
+static void expressionStatement() {
+  expression();
+  consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+  /* An expression evaluates to a results which is discarded or emitted from
+   * the stack to be used by the caller */
+  emitByte(OP_POP);
+}
+
+/* Consumes and pushes expressions then pushes Print instruction */
+static void printStatement() {
+  expression();
+  consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+  emitByte(OP_PRINT);
+}
+
+/*
+ * When there's an error, we skip until we reach tokens below and return
+ */
+static void synchronize() {
+  parser.panicMode = false;
+
+  while (parser.current.type != TOKEN_EOF) {
+    if (parser.previous.type == TOKEN_SEMICOLON)
+      return;
+
+    switch (parser.current.type) {
+    case TOKEN_CLASS:
+    case TOKEN_FUN:
+    case TOKEN_VAR:
+    case TOKEN_FOR:
+    case TOKEN_IF:
+    case TOKEN_WHILE:
+    case TOKEN_PRINT:
+    case TOKEN_RETURN:
+      return;
+    default:
+        // Do nothing.
+        ;
+    }
+    advance();
+  }
+}
+
+void declaration() {
+  if (match(TOKEN_VAR)) {
+    varDeclaration();
+  } else
+    statement();
+
+  if (parser.panicMode)
+    synchronize();
+}
+
+static void statement() {
+  if (match(TOKEN_PRINT)) {
+    printStatement();
+  } else {
+    expressionStatement();
+  }
+}
 /**
- * We assume the left operand has already been consumed already and we have now
- * reached the operator.
- * We push the left operand, the right then the operator
- * a + b => |+|b|a| in the stack
+ * We assume the left operand has already been consumed already and we have
+ * now reached the operator. We push the left operand, the right then the
+ * operator a + b => |+|b|a| in the stack
  */
 static void binary() {
   // Remember the operator
@@ -307,12 +417,12 @@ static void number() {
 }
 
 /*
- * We save a copy of the string from the source code because we want to avoid to
- * point to it.
+ * We save a copy of the string from the source code because we want to avoid
+ * to point to it.
  *
  * Assumes the begining ", has been comsumed, we copy the
- * characters from the parser and create a string out of the characters and then
- * emit it to the chunk.
+ * characters from the parser and create a string out of the characters and
+ * then emit it to the chunk.
  */
 static void string() {
   // Notice the previous.start+1 is the first character of the string since
@@ -320,6 +430,19 @@ static void string() {
   emitConstant(OBJ_VAL(
       copyString(parser.previous.start + 1, parser.previous.length - 2)));
 }
+
+/**
+ * This tries to resolve a variable name. It looks for the name in the chunk
+ * constants and returns the index. We finally return the opcode OP_GET_GLOBAL
+ * with the gloabal variable index
+ */
+static void namedVariable(Token name) {
+  uint8_t arg = indentifierConstant(&name);
+  emitBytes(OP_GET_GLOBAL, arg);
+}
+/*
+ * When we expect a variable identifier */
+static void variable() { namedVariable(parser.previous); }
 
 /**
  * Assumes the the begining unary operator has already been consumed
@@ -333,8 +456,8 @@ static void unary() {
   /*Note that we only want to parse expressions whose precedence is greater or
    * same as the unary expressions i.e. calls,
    * This is to avoid cases like -a.b + x where the unary should only apply to
-   * a.b and not to the rest of the operation as binary + has lesser precendence
-   * than unary*/
+   * a.b and not to the rest of the operation as binary + has lesser
+   * precendence than unary*/
   parsePrecedence(PREC_UNARY);
 
   switch (operatorType) {
@@ -370,7 +493,8 @@ ParseRule rules[] = {
     [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
 
-    [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
+
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
@@ -405,8 +529,10 @@ bool compile(const char *source, Chunk *chunk) {
   parser.hadError = false;
 
   advance();
-  expression();
-  consume(TOKEN_EOF, "Expect end of expression.");
+  // The entry point is the declaration
+  while (!match(TOKEN_EOF)) {
+    declaration();
+  }
   endCompiler();
   return !parser.hadError;
 }

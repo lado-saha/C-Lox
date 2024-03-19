@@ -39,11 +39,13 @@ static void runtimeError(const char *format, ...) {
 void initVM() {
   resetStack();
   vm.objects = NULL;
+  initTable(&vm.globals);
   initTable(&vm.strings);
 }
 
 void freeVM() {
   freeObjects();
+  freeTable(&vm.globals);
   freeTable(&vm.strings);
 }
 
@@ -89,6 +91,7 @@ static void concatenate() {
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->consants.values[READ_BYTE()])
+#define READ_STRING() AS_STRING(READ_CONSTANT())
 
   /*The do { ... } while (false)  is used so that all the code will be pasted in
    * braces and in the same context, when the macro will be ran *
@@ -197,15 +200,41 @@ static InterpretResult run() {
       push(BOOL_VAL(valuesEqual(a, b)));
       break;
     }
+    case OP_PRINT: {
+      printValue(pop());
+      printf("\n");
+      break;
+    }
+    case OP_POP:
+      pop();
+      break;
+
+      // Adds global var to the table
+    case OP_DEFINE_GLOBAL: {
+      ObjString *name = READ_STRING();
+      tableSet(&vm.globals, name, peek(0));
+      pop();
+      break;
+    }
+      // Tries to resolve and return the variable name
+    case OP_GET_GLOBAL: {
+      ObjString *name = READ_STRING();
+      Value value;
+      if (!tableGet(&vm.globals, name, &value)) {
+        runtimeError("Undefined variable '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      push(value);
+      break;
+    }
 
     case OP_RETURN: {
       // Temporary exit point
-      printValue(pop());
-      printf("\n");
       return INTERPRET_OK;
     }
     }
 #undef READ_BYTE
+#undef READ_STRING
 #undef READ_CONSTANT
 #undef BINARY_OP
   }
