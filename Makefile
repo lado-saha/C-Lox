@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS =  -g
-TARGET = build/clox
+TARGET = build/clox.o
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:%.c=build/%.o)
 
