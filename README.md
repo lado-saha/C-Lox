@@ -26,10 +26,17 @@ We are currently building an interpreted language called lox, which compiles sou
 * Clone the Project
 * Navigate into the project, then... 
 ```bash
-# To run the REPL
-make clean all run;
+# To compile 
+make 
 
-# To run a file , comming next
+# To run the REPL
+make run
+
+# You can write code in ./examples/test.lox and execute it using 
+make example
+
+# Else, if run any file as follows
+make run path=<FILE PATH>   
 
 ```
 

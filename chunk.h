@@ -41,6 +41,7 @@ index 23 from the list of constants in the array
 
   OP_DEFINE_GLOBAL,
   OP_GET_GLOBAL,
+  OP_SET_GLOBAL,
 
 } OpCode;
 

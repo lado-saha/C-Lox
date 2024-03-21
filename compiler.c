@@ -435,10 +435,19 @@ static void string() {
  * This tries to resolve a variable name. It looks for the name in the chunk
  * constants and returns the index. We finally return the opcode OP_GET_GLOBAL
  * with the gloabal variable index
+ *
+ * To care of cases like x.y().z = a, we always check if there is an equal sign
+ * in the future, in which case we make a set expression instead of a get
+ * expression .
  */
 static void namedVariable(Token name) {
   uint8_t arg = indentifierConstant(&name);
-  emitBytes(OP_GET_GLOBAL, arg);
+  if (match(TOKEN_EQUAL)) {
+    expression();
+    emitBytes(OP_SET_GLOBAL, arg);
+  } else {
+    emitBytes(OP_GET_GLOBAL, arg);
+  }
 }
 /*
  * When we expect a variable identifier */

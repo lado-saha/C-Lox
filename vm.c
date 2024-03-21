@@ -228,6 +228,18 @@ static InterpretResult run() {
       break;
     }
 
+      /* In this case, we are trying to change the value of an alrady declared
+      variable */
+    case OP_SET_GLOBAL: {
+      ObjString *name = READ_STRING();
+      if (!tableSet(&vm.globals, name, peek(0))) {
+        tableDelete(&vm.globals, name);
+        runtimeError("Undefined variable '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      break;
+    }
+
     case OP_RETURN: {
       // Temporary exit point
       return INTERPRET_OK;

@@ -15,7 +15,10 @@ build/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run:
-	$(TARGET)
+	$(TARGET) $(path)
+
+example:
+	$(TARGET) ./examples/test.lox
 
 clean:
 	rm -f $(OBJS) $(TARGET)
