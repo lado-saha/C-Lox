@@ -50,7 +50,7 @@ typedef enum {
 /*
  * This is function type. We just named it ParseFn and parse function
  */
-typedef void (*ParseFn)();
+typedef void (*ParseFn)(bool canAssign);
 
 /*
  * A general of a parser rule. This rule is describe precedence of operators,
@@ -77,6 +77,7 @@ static void consume(TokenType type, const char *message);
 static void expression();
 static void statement();
 static void declaration();
+static ParseRule *getRule(TokenType type);
 static ParseRule *getRule(TokenType type);
 /**
  * This is nice way to only parse expressions whose precdence is higher or
@@ -217,7 +218,10 @@ static void parsePrecedence(Precedence minumum) {
     return;
   }
   // We call the function to parse it. It can be unary() etc
-  prefixRule();
+  /* We can only assgn when the minumum precedence is less than the assignment
+  precedence */
+  bool canAssign = minumum <= PREC_ASSIGNMENT;
+  prefixRule(canAssign);
 
   /*
    * We continuously parse till we reach a lower precendence or a non infix
@@ -228,13 +232,11 @@ static void parsePrecedence(Precedence minumum) {
   while (minumum <= getRule(parser.current.type)->precedence) {
     advance();
     ParseFn infixRule = getRule(parser.previous.type)->infix;
-    infixRule();
+    infixRule(canAssign);
   }
 }
-
 static void endCompiler() {
   emitReturn();
-
 #ifdef DEBUG_PRINT_CODE
   if (!parser.hadError) {
     disassembleChunk(currentChunck(), "code");
@@ -331,7 +333,7 @@ static void statement() {
  * now reached the operator. We push the left operand, the right then the
  * operator a + b => |+|b|a| in the stack
  */
-static void binary() {
+static void binary(bool canAssign) {
   // Remember the operator
   TokenType operatorType = parser.previous.type;
 
@@ -383,7 +385,7 @@ static void binary() {
  *
  * We consider them as opcodes and so we can emit them to the stack
  */
-static void literal() {
+static void literal(bool canAssign) {
   switch (parser.previous.type) {
   case TOKEN_FALSE:
     emitByte(OP_FALSE);
@@ -402,7 +404,7 @@ static void literal() {
 /**
  * We assume the beginning `(` has been comsumed already
  */
-static void grouping() {
+static void grouping(bool canAssign) {
   /*Compute the content of the bracket */
   expression();
   consume(TOKEN_RIGHT_PAREN, "expected ')' after expression.");
@@ -411,7 +413,7 @@ static void grouping() {
 /*
  * Takes a consumed number token  and convert it into a double, then emits it
  */
-static void number() {
+static void number(bool canAssign) {
   double value = strtod(parser.previous.start, NULL);
   emitConstant(NUMBER_VAL(value));
 }
@@ -424,7 +426,7 @@ static void number() {
  * characters from the parser and create a string out of the characters and
  * then emit it to the chunk.
  */
-static void string() {
+static void string(bool canAssign) {
   // Notice the previous.start+1 is the first character of the string since
   // previous.start is `"`
   emitConstant(OBJ_VAL(
@@ -439,10 +441,11 @@ static void string() {
  * To care of cases like x.y().z = a, we always check if there is an equal sign
  * in the future, in which case we make a set expression instead of a get
  * expression .
+ * @canAssign We make sure we can assign
  */
-static void namedVariable(Token name) {
+static void namedVariable(Token name, bool canAssign) {
   uint8_t arg = indentifierConstant(&name);
-  if (match(TOKEN_EQUAL)) {
+  if (canAssign && match(TOKEN_EQUAL)) {
     expression();
     emitBytes(OP_SET_GLOBAL, arg);
   } else {
@@ -450,8 +453,11 @@ static void namedVariable(Token name) {
   }
 }
 /*
- * When we expect a variable identifier */
-static void variable() { namedVariable(parser.previous); }
+ * When we expect a variable identifier
+ */
+static void variable(bool canAssign) {
+  namedVariable(parser.previous, canAssign);
+}
 
 /**
  * Assumes the the begining unary operator has already been consumed
@@ -459,7 +465,7 @@ static void variable() { namedVariable(parser.previous); }
  * The negate is emitted last after the expression because it lives on top of
  * the stack
  */
-static void unary() {
+static void unary(bool canAssign) {
   TokenType operatorType = parser.previous.type;
 
   /*Note that we only want to parse expressions whose precedence is greater or
