@@ -8,7 +8,7 @@ The book is truly written in FUNNY but CONCISE language. I never knew cracking j
 
 **Project Description:**
 
-We are currently building an interpreted language called lox, which compiles source code into bytecode and execute it using a VM.. So far, I've implemented features like:
+We are currently building a single-pass compiled language called lox, which compiles source code into bytecode and execute it using a VM.. So far, I've implemented features like:
 
 * A Parser (Using Pratt's Parsing technique) which produces tokens
 * A bytecode representation

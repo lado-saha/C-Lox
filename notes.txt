@@ -40,3 +40,6 @@ Functions, Strings and classe types are stored in the heap and not the stack bec
  String interning is an interesting concept in that, we make similar strings point to the same memory location and thus making comparison trivial. We use tables for that.
 
 Notice that statments do not produce any value and so they leave the stack unchanged. While, expressions combines values to produce a single result and thus changes the stack. 
+
+clox use of stacked base VM really facilitates the handling of local variables. We can push variables as we enter a block and pop it when we exit
+

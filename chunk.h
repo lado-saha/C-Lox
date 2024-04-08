@@ -25,6 +25,8 @@ index 23 from the list of constants in the array
 
   // To emit a result or value from the stack
   OP_POP,
+  OP_GET_LOCAL,
+  OP_SET_LOCAL,
 
   OP_NIL,
   OP_TRUE,

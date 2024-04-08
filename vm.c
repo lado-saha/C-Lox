@@ -216,6 +216,19 @@ static InterpretResult run() {
       pop();
       break;
     }
+
+    case OP_GET_LOCAL: {
+      uint8_t slot = READ_BYTE();
+      push(vm.stack[slot]);
+      break;
+    }
+
+    case OP_SET_LOCAL: {
+      uint8_t slot = READ_BYTE();
+
+      vm.stack[slot] = peek(0);
+      break;
+    }
       // Tries to resolve and return the variable name
     case OP_GET_GLOBAL: {
       ObjString *name = READ_STRING();
