@@ -1,18 +1,20 @@
 CC = gcc
-CFLAGS =  -g
+CFLAGS = -g
 TARGET = build/clox.o
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:%.c=build/%.o)
 
 .PHONY: all clean run
 
-all: $(TARGET)
+all: build_dir $(TARGET)
+
+build_dir:
+	mkdir -p build
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
-	clear
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-build/%.o: %.c
+build/%.o: %.c | build_dir
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
 run:
@@ -22,4 +24,5 @@ example:
 	$(TARGET) ./examples/test.lox
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf build
+
