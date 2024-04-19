@@ -1,4 +1,5 @@
 #include "compiler.h"
+
 #include "chunk.h"
 #include "object.h"
 #include "scanner.h"
@@ -275,6 +276,20 @@ static void emitBytes(uint8_t byte1, uint8_t byte2) {
   emitByte(byte2);
 }
 
+/**
+ * This is temporarily puts a placeholder offset, which get replaced patched by
+ * the actual offset later when that code is compiled The first emits a
+ * placeholder operand for the jump offset. Then make 2 x 16bit offset jump over
+ * up to 65 536 bytes of code.
+ */
+static int emitJump(uint8_t instruction) {
+  // Instruction can be JUMP_IF_FALSE or JUMP
+  emitByte(instruction);
+  emitByte(0xff);
+  emitByte(0xff);
+  return currentChunck()->count - 2;
+}
+
 static void emitReturn() { emitByte(OP_RETURN); }
 /*
  * Add the value as a constant to the compilingChunk and verifies if the limit
@@ -293,6 +308,21 @@ static uint8_t makeConstant(Value value) {
 
 static void emitConstant(Value value) {
   emitBytes(OP_CONSTANT, makeConstant(value));
+}
+
+/**
+ * The function later navigates back to the offset place holder and gives the
+ * right value to jump
+ */
+static void patchJump(int offset) {
+  // The -2 is to take into account the jump instruction offset itself
+  int jump = currentChunck()->count - offset - 2;
+
+  if (jump > UINT16_MAX) {
+    error("To much code to jump over.");
+  }
+  currentChunck()->code[offset] = (jump >> 8) & 0xff;
+  currentChunck()->code[offset + 1] = jump & 0xff;
 }
 
 static void initCompiler(Compiler *compiler) {
@@ -442,9 +472,37 @@ void declaration() {
     synchronize();
 }
 
+/*
+ * Usss jumps to manage
+ */
+static void ifStatement() {
+  consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+  expression(); // Compile the condition
+  consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+  /* If the condition is false, we jump inorder not to execute the block
+   Since we have not yet compiled the then block to know kow much to jump, we
+   just use a placeholder offset which will be replace after we compile the
+   block. This method is called backpatching
+   */
+  int thenJump = emitJump(OP_JUMP_IF_FALSE);
+  emitByte(OP_POP);
+  statement();
+
+  int elseJump = emitJump(OP_JUMP);
+
+  patchJump(thenJump);
+  emitByte(OP_POP);
+
+  if (match(TOKEN_ELSE))
+    statement();
+  patchJump(elseJump);
+}
+
 static void statement() {
   if (match(TOKEN_PRINT)) {
     printStatement();
+  } else if (match(TOKEN_IF)) {
+    ifStatement();
   } else if (match(TOKEN_LEFT_BRACE)) {
     // A block
     beginScope();
@@ -457,8 +515,7 @@ static void statement() {
 /**
  * We assume the left operand has already been consumed already and we have
  * now reached the operator. We push the left operand, the right then the
- * operator a + b => |+|b|a| in the stack
- */
+ * operator a + b => |+|b|a| in the stack */
 static void binary(bool canAssign) {
   // Remember the operator
   TokenType operatorType = parser.previous.type;

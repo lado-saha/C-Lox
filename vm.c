@@ -92,7 +92,7 @@ static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->consants.values[READ_BYTE()])
 #define READ_STRING() AS_STRING(READ_CONSTANT())
-
+#define READ_SHORT() (vm.ip += 2, (uint16_t)((vm.ip[-2] << 8) | vm.ip[-1]));
   /*The do { ... } while (false)  is used so that all the code will be pasted in
    * braces and in the same context, when the macro will be ran *
    * Notice that the 1st pop goes into `b` and not `a`
@@ -253,11 +253,27 @@ static InterpretResult run() {
       break;
     }
 
+      // To jump, we change the value of the istruction pointer(ip)
+    case OP_JUMP_IF_FALSE: {
+      uint16_t offset = READ_SHORT();
+      if (isFalsey(peek(0)))
+        vm.ip += offset;
+      break;
+    }
+
+    // This is the core of control flow
+    case OP_JUMP: {
+      uint16_t offset = READ_SHORT();
+      vm.ip += offset;
+      break;
+    }
+
     case OP_RETURN: {
       // Temporary exit point
       return INTERPRET_OK;
     }
     }
+#undef READ_SHORT
 #undef READ_BYTE
 #undef READ_STRING
 #undef READ_CONSTANT

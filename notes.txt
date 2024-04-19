@@ -43,3 +43,5 @@ Notice that statments do not produce any value and so they leave the stack uncha
 
 clox use of stacked base VM really facilitates the handling of local variables. We can push variables as we enter a block and pop it when we exit
 
+===================Control flow=========================
+The ip points to the current instruction being executed and so to implement control flow, we need to implement a concept of JUMPING. This can be done by offsetting the ip to another bytecode instruction. So introducing the JUMP

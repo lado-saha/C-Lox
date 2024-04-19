@@ -32,6 +32,7 @@
  * 4) Grow existing block: oldSize != 0 & newSize > oldSize
  *
  */
+
 void *reallocate(void *pointer, size_t oldSize, size_t newSize);
 /*
  * This ensures that all allocated objects are not dereferenced without freeing
