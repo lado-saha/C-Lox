@@ -41,6 +41,7 @@ make run path=<FILE PATH>
 ```
 
 **Conclusion:**
+>> NB: PENDING FINAL FILE ARBORESCENCE
 
 Thank you for checking out my project! Feel free to explore the code and see how the language is taking shape.
 
