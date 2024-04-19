@@ -1,4 +1,6 @@
 var x = 0;
-if(x == 2 or x == 1) print "GOOOD";
-if(x == 0 or x == 1) print "GOOOD";
+if(x == 2 or x == 1) {
+  print "GOOOD";
+}
+if(x == -1 or x == 1) print "GOOOD";
 

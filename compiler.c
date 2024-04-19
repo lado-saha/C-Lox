@@ -387,7 +387,7 @@ static void endScope() {
 void expression() { parsePrecedence(PREC_ASSIGNMENT); }
 
 static void block() {
-  while (!check(TOKEN_RIGHT_PAREN) && !check(TOKEN_EOF)) {
+  while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
     declaration();
   }
   consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
