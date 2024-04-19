@@ -471,6 +471,66 @@ static void expressionStatement() {
   emitByte(OP_POP);
 }
 
+static void forStatement() {
+  // If there is any variable declaration, then that should be scoped to the for
+  // clauses only.
+  beginScope();
+  consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
+  if (match(TOKEN_SEMICOLON)) {
+    // No initializer
+    // for(;..
+  } else if (match(TOKEN_VAR)) {
+    // for(var ... ;..
+    varDeclaration();
+  } else {
+    // for(...;)
+    expressionStatement();
+  }
+  // consume(TOKEN_SEMICOLON, "Expected ';'."); // After initializer
+
+  // Store the position before the loop
+  int loopStart = currentChunck()->count;
+
+  int exitJump = -1;
+  if (!match(TOKEN_SEMICOLON)) {
+    // In case where there is a looping condition
+    expression(); // loop condition expr
+    consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
+
+    // Jump out of the loop if the condition is false
+    exitJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP); // emit the condition results
+  }
+
+  // consume(TOKEN_SEMICOLON, "Expected ';'."); // For increment
+
+  // Evaluate the increment expression
+  if (!match(TOKEN_RIGHT_PAREN)) {
+    int bodyJump = emitJump(OP_JUMP);
+
+    int incrementStart = currentChunck()->count;
+    expression();
+    emitByte(OP_POP);
+    consume(TOKEN_RIGHT_PAREN, "Expected ')' after for clauses.");
+
+    emitLoop(loopStart);
+    loopStart = incrementStart;
+    patchJump(bodyJump);
+  }
+
+  // Evaluates the block
+  statement();
+
+  emitLoop(loopStart);
+
+  if (exitJump != -1) {
+    patchJump(exitJump);
+    emitByte(OP_POP);
+  }
+
+  endScope();
+}
+
 /* Consumes and pushes expressions then pushes Print instruction */
 static void printStatement() {
   expression();
@@ -572,6 +632,8 @@ static void statement() {
     printStatement();
   } else if (match(TOKEN_WHILE)) {
     whileStatement();
+  } else if (match(TOKEN_FOR)) {
+    forStatement();
   } else if (match(TOKEN_IF)) {
     ifStatement();
   } else if (match(TOKEN_LEFT_BRACE)) {
