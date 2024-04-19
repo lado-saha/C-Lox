@@ -22,6 +22,7 @@ index 23 from the list of constants in the array
   OP_NEGATE, // Unary negation
   OP_PRINT,
   OP_JUMP_IF_FALSE,
+  OP_LOOP,
   OP_ADD,
 
   // To emit a result or value from the stack
