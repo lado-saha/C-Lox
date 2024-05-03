@@ -196,7 +196,7 @@ static InterpretResult run() {
       break;
 
     case OP_LESS:
-      BINARY_OP(BOOL_VAL, >);
+      BINARY_OP(BOOL_VAL, <);
       break;
 
     // Comparison
@@ -231,7 +231,6 @@ static InterpretResult run() {
 
     case OP_SET_LOCAL: {
       uint8_t slot = READ_BYTE();
-
       vm.stack[slot] = peek(0);
       break;
     }
@@ -251,7 +250,7 @@ static InterpretResult run() {
       variable */
     case OP_SET_GLOBAL: {
       ObjString *name = READ_STRING();
-      if (!tableSet(&vm.globals, name, peek(0))) {
+      if (tableSet(&vm.globals, name, peek(0))) {
         tableDelete(&vm.globals, name);
         runtimeError("Undefined variable '%s'.", name->chars);
         return INTERPRET_RUNTIME_ERROR;

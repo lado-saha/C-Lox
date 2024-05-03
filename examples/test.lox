@@ -1,6 +1,6 @@
 var i = 0;
-while(i >= 1){
-  print " Good";
+
+while(i < 100) {
+  i = i + 10;
+  print i;
 }
-
-

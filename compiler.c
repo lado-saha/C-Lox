@@ -149,7 +149,7 @@ static void addLocal(Token name) {
   }
   Local *local = &current->locals[current->localCount++];
   local->name = name;
-  local->depth = -1;
+  local->depth = current->scopeDepth;
 }
 
 static void declareVariable() {
@@ -167,7 +167,7 @@ static void declareVariable() {
     }
 
     if (identifiersEqual(name, &local->name)) {
-      error("already variable with this name in this scope.");
+      error("There is already another variable with this name in this scope.");
     }
   }
   addLocal(*name);
@@ -388,7 +388,7 @@ static void beginScope() { current->scopeDepth++; }
 static void endScope() {
   current->scopeDepth--;
 
-  // pop all locals defined in this scope
+  // Pop all locals defined in this scope
   while (current->localCount > 0 &&
          current->locals[current->localCount - 1].depth > current->scopeDepth) {
     emitByte(OP_POP);
@@ -404,8 +404,10 @@ static void block() {
   while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
     declaration();
   }
+
   consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
+
 static void markInitialized() {
   current->locals[current->localCount - 1].depth = current->scopeDepth;
 }
